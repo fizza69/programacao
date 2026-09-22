@@ -4,8 +4,49 @@ const ctx = canvas.getContext("2d");
 const mensagem = document.querySelector("#mensagem");
 
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+/*
+    AJUSTA A RESOLUÇÃO DO CANVAS
+
+    O celular possui uma densidade de pixels
+    maior que a resolução CSS.
+
+    O devicePixelRatio permite que o Canvas
+    aproveite esses pixels extras.
+*/
+
+function ajustarCanvas() {
+
+    const dpr =
+        window.devicePixelRatio || 1;
+
+
+    canvas.width =
+        window.innerWidth * dpr;
+
+    canvas.height =
+        window.innerHeight * dpr;
+
+
+    canvas.style.width =
+        window.innerWidth + "px";
+
+    canvas.style.height =
+        window.innerHeight + "px";
+
+
+    ctx.setTransform(
+        dpr,
+        0,
+        0,
+        dpr,
+        0,
+        0
+    );
+
+}
+
+
+ajustarCanvas();
 
 
 const SCALE = Math.min(
@@ -32,7 +73,9 @@ const COLORS = [
 
 function heartXY(t) {
 
-    let x = 16 * (Math.sin(t) ** 3);
+    let x =
+        16 * (Math.sin(t) ** 3);
+
 
     let y =
         13 * Math.cos(t)
@@ -40,19 +83,29 @@ function heartXY(t) {
         - 2 * Math.cos(3 * t)
         - Math.cos(4 * t);
 
+
     return {
         x: x,
         y: -y
     };
+
 }
 
 
 function toScreen(x, y) {
 
     return {
-        x: x * SCALE + canvas.width / 2,
-        y: y * SCALE + canvas.height / 2
+
+        x:
+            x * SCALE
+            + window.innerWidth / 2,
+
+        y:
+            y * SCALE
+            + window.innerHeight / 2
+
     };
+
 }
 
 
@@ -63,29 +116,38 @@ class Particle {
         this.x = x;
         this.y = y;
 
+
         this.word =
             WORDS[
                 Math.floor(
-                    Math.random() * WORDS.length
+                    Math.random()
+                    * WORDS.length
                 )
             ];
+
 
         this.color =
             COLORS[
                 Math.floor(
-                    Math.random() * COLORS.length
+                    Math.random()
+                    * COLORS.length
                 )
             ];
 
+
         this.alpha = 0;
+
 
         this.delay =
             Math.random() * 180;
 
+
         this.tempo = 0;
+
 
         this.size =
             Math.random() * 5 + 8;
+
     }
 
 
@@ -94,10 +156,17 @@ class Particle {
         this.tempo += 1;
 
 
-        if (this.tempo > this.delay) {
+        if (
+            this.tempo >
+            this.delay
+        ) {
 
-            if (this.alpha < 1) {
+            if (
+                this.alpha < 1
+            ) {
+
                 this.alpha += 0.015;
+
             }
 
         }
@@ -107,44 +176,61 @@ class Particle {
 
     desenhar() {
 
-    if (this.alpha <= 0) {
-        return;
+        if (
+            this.alpha <= 0
+        ) {
+
+            return;
+
+        }
+
+
+        ctx.save();
+
+
+        ctx.globalAlpha =
+            this.alpha;
+
+
+        ctx.fillStyle =
+            this.color;
+
+
+        ctx.font =
+            `${this.size}px "Cormorant Garamond", serif`;
+
+
+        ctx.textAlign =
+            "center";
+
+
+        ctx.textBaseline =
+            "middle";
+
+
+        /*
+            Brilho individual
+            de cada frase.
+        */
+
+        ctx.shadowColor =
+            this.color;
+
+
+        ctx.shadowBlur =
+            10;
+
+
+        ctx.fillText(
+            this.word,
+            this.x,
+            this.y
+        );
+
+
+        ctx.restore();
+
     }
-
-
-    ctx.save();
-
-
-    ctx.globalAlpha = this.alpha;
-
-    ctx.fillStyle = this.color;
-
-
-    ctx.font =
-        `${this.size}px "Cormorant Garamond", serif`;
-
-    ctx.textAlign = "center";
-
-    ctx.textBaseline = "middle";
-
-
-    // Brilho individual de cada "Love You"
-
-    ctx.shadowColor = this.color;
-
-    ctx.shadowBlur = 10;
-
-
-    ctx.fillText(
-        this.word,
-        this.x,
-        this.y
-    );
-
-
-    ctx.restore();
-
-}
 
 }
 
@@ -154,9 +240,6 @@ let particles = [];
 
 /*
     BORDA DO CORAÇÃO
-
-    Aumentamos a quantidade para
-    deixar a forma mais preenchida.
 */
 
 function buildOutlineParticles() {
@@ -164,7 +247,11 @@ function buildOutlineParticles() {
     const quantidade = 220;
 
 
-    for (let i = 0; i < quantidade; i++) {
+    for (
+        let i = 0;
+        i < quantidade;
+        i++
+    ) {
 
         let t =
             (i / quantidade)
@@ -197,34 +284,39 @@ function buildOutlineParticles() {
 
 /*
     INTERIOR DO CORAÇÃO
-
-    Agora temos muito mais frases
-    espalhadas dentro do coração.
 */
 
 function buildFillParticles() {
 
     const quantidade = 650;
 
+
     let criadas = 0;
 
     let tentativas = 0;
 
-    const maxTentativas = quantidade * 100;
+
+    const maxTentativas =
+        quantidade * 100;
 
 
     /*
-        Criamos uma "borda virtual" usando
-        exatamente a mesma matemática do
-        coração principal.
+        Criamos a borda virtual
+        usando a mesma matemática
+        do coração.
     */
 
     const pontosCoracao = [];
 
+
     const quantidadeBorda = 500;
 
 
-    for (let i = 0; i < quantidadeBorda; i++) {
+    for (
+        let i = 0;
+        i < quantidadeBorda;
+        i++
+    ) {
 
         let t =
             (i / quantidadeBorda)
@@ -245,8 +337,8 @@ function buildFillParticles() {
 
 
     /*
-        Verifica se um ponto está dentro
-        do coração.
+        Verifica se um ponto
+        está dentro do coração.
     */
 
     function estaDentro(x, y) {
@@ -255,35 +347,50 @@ function buildFillParticles() {
 
 
         for (
-            let i = 0, j = pontosCoracao.length - 1;
+            let i = 0,
+            j = pontosCoracao.length - 1;
+
             i < pontosCoracao.length;
+
             j = i++
         ) {
 
-            let xi = pontosCoracao[i].x;
-            let yi = pontosCoracao[i].y;
+            let xi =
+                pontosCoracao[i].x;
 
-            let xj = pontosCoracao[j].x;
-            let yj = pontosCoracao[j].y;
+            let yi =
+                pontosCoracao[i].y;
+
+
+            let xj =
+                pontosCoracao[j].x;
+
+            let yj =
+                pontosCoracao[j].y;
 
 
             let cruza =
                 (
-                    (yi > y) !== (yj > y)
+                    (yi > y)
+                    !==
+                    (yj > y)
                 )
                 &&
                 (
                     x <
                     (xj - xi)
-                    * (y - yi)
-                    / (yj - yi)
+                    *
+                    (y - yi)
+                    /
+                    (yj - yi)
                     + xi
                 );
 
 
             if (cruza) {
 
-                dentro = !dentro;
+                dentro =
+                    !dentro;
 
             }
 
@@ -296,17 +403,22 @@ function buildFillParticles() {
 
 
     /*
-        Descobrimos o tamanho real do coração.
+        Descobre o tamanho
+        real do coração.
     */
 
     let minX = Infinity;
+
     let maxX = -Infinity;
 
     let minY = Infinity;
+
     let maxY = -Infinity;
 
 
-    for (let ponto of pontosCoracao) {
+    for (
+        let ponto of pontosCoracao
+    ) {
 
         minX =
             Math.min(
@@ -314,17 +426,20 @@ function buildFillParticles() {
                 ponto.x
             );
 
+
         maxX =
             Math.max(
                 maxX,
                 ponto.x
             );
 
+
         minY =
             Math.min(
                 minY,
                 ponto.y
             );
+
 
         maxY =
             Math.max(
@@ -336,15 +451,13 @@ function buildFillParticles() {
 
 
     /*
-        Sorteamos posições aleatórias dentro
-        da caixa do coração.
-
-        Só aceitamos as que realmente estão
-        dentro da curva.
+        Sorteia posições aleatórias
+        dentro da área do coração.
     */
 
     while (
-        criadas < quantidade &&
+        criadas < quantidade
+        &&
         tentativas < maxTentativas
     ) {
 
@@ -353,22 +466,26 @@ function buildFillParticles() {
 
         let x =
             Math.random()
-            * (maxX - minX)
+            *
+            (maxX - minX)
             + minX;
 
 
         let y =
             Math.random()
-            * (maxY - minY)
+            *
+            (maxY - minY)
             + minY;
 
 
         /*
-            Se estiver fora do coração,
-            simplesmente tentamos outra posição.
+            Se estiver fora,
+            tenta novamente.
         */
 
-        if (!estaDentro(x, y)) {
+        if (
+            !estaDentro(x, y)
+        ) {
 
             continue;
 
@@ -383,23 +500,31 @@ function buildFillParticles() {
 
 
         /*
-            Evita que as frases fiquem
-            todas grudadas.
+            Evita que as frases
+            fiquem muito grudadas.
         */
 
-        let muitoPerto = false;
+        let muitoPerto =
+            false;
 
 
-        for (let particle of particles) {
+        for (
+            let particle of particles
+        ) {
 
             let distancia =
                 Math.hypot(
-                    tela.x - particle.x,
-                    tela.y - particle.y
+                    tela.x -
+                    particle.x,
+
+                    tela.y -
+                    particle.y
                 );
 
 
-            if (distancia < 15) {
+            if (
+                distancia < 15
+            ) {
 
                 muitoPerto = true;
 
@@ -410,7 +535,9 @@ function buildFillParticles() {
         }
 
 
-        if (muitoPerto) {
+        if (
+            muitoPerto
+        ) {
 
             continue;
 
@@ -425,10 +552,13 @@ function buildFillParticles() {
 
 
         particle.size =
-            Math.random() * 4 + 7;
+            Math.random()
+            * 4 + 7;
 
 
-        particles.push(particle);
+        particles.push(
+            particle
+        );
 
 
         criadas++;
@@ -436,29 +566,35 @@ function buildFillParticles() {
     }
 
 }
-/*
-    BRILHO DO CORAÇÃO
 
-    O brilho fica atrás das frases.
+
+/*
+    BRILHO ATRÁS DO CORAÇÃO
 */
 
 function drawHeartGlow() {
 
     let centroX =
-        canvas.width / 2;
+        window.innerWidth / 2;
+
 
     let centroY =
-        canvas.height / 2;
+        window.innerHeight / 2;
 
 
     let gradiente =
         ctx.createRadialGradient(
+
             centroX,
             centroY,
+
             SCALE * 3,
+
             centroX,
             centroY,
+
             SCALE * 18
+
         );
 
 
@@ -467,15 +603,18 @@ function drawHeartGlow() {
         "rgba(30, 144, 255, 0.25)"
     );
 
+
     gradiente.addColorStop(
         0.3,
         "rgba(30, 144, 255, 0.13)"
     );
 
+
     gradiente.addColorStop(
         0.6,
         "rgba(30, 144, 255, 0.05)"
     );
+
 
     gradiente.addColorStop(
         1,
@@ -483,46 +622,40 @@ function drawHeartGlow() {
     );
 
 
-    ctx.fillStyle = gradiente;
+    ctx.fillStyle =
+        gradiente;
 
 
     ctx.fillRect(
         0,
         0,
-        canvas.width,
-        canvas.height
+        window.innerWidth,
+        window.innerHeight
     );
 
 }
 
 
-let inicio = Date.now();
-
-
+/*
+    ANIMAÇÃO
+*/
 
 function animate() {
 
     ctx.clearRect(
         0,
         0,
-        canvas.width,
-        canvas.height
+        window.innerWidth,
+        window.innerHeight
     );
 
-
-    /*
-        Primeiro desenhamos o brilho.
-
-        Depois as frases.
-
-        Isso faz o brilho ficar
-        visualmente atrás do coração.
-    */
 
     drawHeartGlow();
 
 
-    for (let particle of particles) {
+    for (
+        let particle of particles
+    ) {
 
         particle.atualizar();
 
@@ -531,33 +664,36 @@ function animate() {
     }
 
 
-
-    requestAnimationFrame(animate);
+    requestAnimationFrame(
+        animate
+    );
 
 }
 
 
-let cliques = 0;
-
-
-mensagem.style.pointerEvents = "auto";
-
-
-
+/*
+    SE A TELA MUDAR DE TAMANHO
+*/
 
 window.addEventListener(
     "resize",
     function() {
 
-        canvas.width =
-            window.innerWidth;
+        /*
+            Recarrega a página porque
+            o tamanho do coração depende
+            do tamanho da tela.
+        */
 
-        canvas.height =
-            window.innerHeight;
+        location.reload();
 
     }
 );
 
+
+/*
+    CRIA O CORAÇÃO
+*/
 
 buildOutlineParticles();
 
