@@ -1,4 +1,5 @@
 #MAPA DO LABIRINTO
+direcao = ''
 mapa = [
  '#################',
  '#               #',
@@ -27,27 +28,34 @@ mapa[jogador_linha] = (
     + mapa[jogador_linha][jogador_coluna + 1:]
 )
 
-for linha in mapa:
-    print(linha)
+    # for linha in mapa:
+    #     print(linha)
+
 #MOVIMENTO DO JOGADOR
+
+
+
 while True:
+    #MOVIMENTAÇÃO PRA DIREITA
+
     direcao = input('Digite a direção (W/A/S/D): ')
     if direcao == 'D':
-        mapa[jogador_linha] = (
-            #TIRAR O P
-            mapa[jogador_linha][:jogador_coluna]
-            + ' '
-            + mapa[jogador_linha][jogador_coluna + 1:]
-            )
-        #COLOCAR O P NA NOVA POSIÇÃO
+        jogador_coluna = jogador_coluna + 1
+        print('Coluna:', jogador_coluna)
+        for linha in mapa:
+            print(linha)
+        
+        # MOVIMENTO PRA ESQUERDA
+    if direcao == 'A':  
+        jogador_coluna = jogador_coluna - 1
+        print('Coluna:', jogador_coluna)
+        for linha in mapa:
+             print(linha)
 
-        mapa[jogador_linha] = (
-            mapa[jogador_linha][:jogador_coluna + 1]
-            + 'P'
-            + mapa[jogador_linha][jogador_coluna :3]
-        )
-        break
     
-for linha in mapa:
-    print(linha)
+
+
+
+
+
 
